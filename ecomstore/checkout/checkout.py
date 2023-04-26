@@ -23,10 +23,7 @@ def process(request):
   cvv = postdata.get('credit_card_cvv','')
   amount = cart.cart_subtotal(request)
   results = {}
-  response = authnet.do_auth_capture(amount=amount,
-  card_num=card_num,
-  exp_date=exp_date,
-  card_cvv=cvv)
+  response = authnet.do_auth_capture(amount=amount, card_num=card_num, exp_date=exp_date, card_cvv=cvv)
   if response[0] == APPROVED:
     transaction_id = response[6]
     order = create_order(request, transaction_id)

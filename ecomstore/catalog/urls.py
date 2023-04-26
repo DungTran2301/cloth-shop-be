@@ -11,8 +11,9 @@ urlpatterns = [
   # 'template_name':'catalog/product.html'},'catalog_product'),
   path("", views.index),
   path("category/", views.show_category, name='category'),
-  path("products/", views.show_all_product, name='products'),
+  path("products/", views.product_list, name='products'),
+  path("product/add_to_cart/", views.addToCart, name='product add to cart'),
   # re_path(r'^category/(?P<category_slug>[-\w]+)/$', views.show_category, name="catalog_category"),
-  re_path(r'^product/(?P<product_slug>[-\w]+)/$', views.show_product, name="product"),
-  re_path(r'^search/result/(?P<product_slug>[-\w]+)/$', views.search_product, name="search_product"),
+  # re_path(r'^product/(?P<product_slug>[-\w]+)/$', views.show_product, name="product"),
+  re_path(r'^product/(?P<id>\d+)/$', views.show_product_by_id, name="product_by_id"),
 ]

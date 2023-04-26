@@ -24,9 +24,9 @@ def get_cart_items(request):
 # add an item to the cart
 def add_to_cart(request):
   postdata = request.data
-  product_slug = postdata.get('product_slug','')
+  product_id = postdata.get('id', 0)
   quantity = postdata.get('quantity', 1)
-  p = get_object_or_404(Product, slug=product_slug)
+  p = get_object_or_404(Product, id=product_id)
   cart_products = get_cart_items(request)
 
   product_in_cart = False
@@ -41,6 +41,7 @@ def add_to_cart(request):
     ci.quantity = quantity
     ci.cart_id = _cart_id(request)
     ci.save()
+  return p
 
 # returns the total number of items in the user's cart
 def cart_distinct_item_count(request):
