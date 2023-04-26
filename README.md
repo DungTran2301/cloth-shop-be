@@ -1,5 +1,22 @@
-# book-store-be
+# cloth-shop-be
 ## Setup MySQL DB
+Open your MySQL and create new database "clothshop"
+
+```python
+DATABASES = {
+    'default': {
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": 'django.db.backends.mysql',
+        "NAME": 'clothshop', # Or path to database file...
+        "USER": '', # Replace with your mysql user name
+        "PASSWORD": '', # Replace with your mysql password
+        "HOST": '', # Set to empty string for localhost....
+        "PORT": '', 
+    }
+}
+```
+**Deprecated**
 1. Open mysql in terminal
 * Open a terminal or command prompt.
 * Type the following command to log in to MySQL:
@@ -22,11 +39,11 @@ Query OK, 0 rows affected (0.00 sec)
 ```
 ## Migrate db
 ```terminal
-\book-store-be\ecomstore> py manage.py migrate      
-\book-store-be\ecomstore> py manage.py makemigrations
+\cloth-shop-be\ecomstore> py manage.py migrate      
+\cloth-shop-be\ecomstore> py manage.py makemigrations
 ```
 
 ## Run server
 ```terminal
-\book-store-be\ecomstore> py manage.py runserver
+\cloth-shop-be\ecomstore> py manage.py runserver
 ```
