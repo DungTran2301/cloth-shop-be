@@ -15,5 +15,5 @@ urlpatterns = [
   path("product/add_to_cart/", views.addToCart, name='product add to cart'),
   # re_path(r'^category/(?P<category_slug>[-\w]+)/$', views.show_category, name="catalog_category"),
   # re_path(r'^product/(?P<product_slug>[-\w]+)/$', views.show_product, name="product"),
-  re_path(r'^product/(?P<id>\d+)/$', views.show_product_by_id, name="product_by_id"),
+  re_path(r'^product/detail/(?P<id>\d+)/$', views.show_product_by_id, name="product_by_id"),
 ]

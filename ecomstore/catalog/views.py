@@ -12,6 +12,9 @@ from cart import cart
 from django.db.models import Q
 from .forms import ProductAddToCartForm
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
+import json
+from django.http import JsonResponse
+from base.models import BaseResponse, GetProductResposeSerializer
 
 
 def index(request, template_name="catalog/index.html"):
@@ -66,8 +69,11 @@ def addToCart(request):
 def show_product_by_id(request, id):
     product = get_object_or_404(Product, id=id)
     if request.method == 'GET':
-        serializers = ProductResponseSerializer(product)
-        return Response(serializers.data)
+        # serializers = ProductResponseSerializer(product)
+        # return Response(serializers.data)
+        res = BaseResponse(True, 200, "success", product) 
+        serializer = GetProductResposeSerializer(res)
+        return Response(serializer.data)
 
 
 @api_view(['POST'])
@@ -79,8 +85,6 @@ def product_list(request):
         list_category = request.POST.getlist('list_category', [])
         price_from = request.data.get('price_from', '')
         price_to = request.data.get('price_to', '')
-
-        print(key_word, order_by_price, price_from)
         products = Product.objects.all()
 
         if key_word:
@@ -104,8 +108,12 @@ def product_list(request):
             products = products.filter(price__lte=price_to)
         
         try:
-            serializers = ProductResponseSerializer(products, many=True)
-            return Response(serializers.data, status=status.HTTP_200_OK)
+            listp = list(products)
+            res = BaseResponse(True, 200, "Get product success", listp) 
+            serializer = GetProductResposeSerializer(res)
+            return Response(serializer.data)#Response(response_data, safe=False)
         except Exception as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            res = BaseResponse(False, 400, str(e), None) 
+            serializer = GetProductResposeSerializer(res)
+            return Response(serializer.data)
 

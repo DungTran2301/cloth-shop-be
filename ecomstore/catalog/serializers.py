@@ -12,7 +12,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class CategoryResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category # this is the model that is being serialized
-        fields = ('id', 'name', 'slug')
+        fields = ('id', 'name')
         
 class ProductResponseSerializer(serializers.ModelSerializer):
     categories = CategoryResponseSerializer(many=True, read_only=True)
@@ -20,7 +20,7 @@ class ProductResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         # fields = '__all__'
-        fields = ('id', 'name', 'slug', 'supplier', 'publisher', 'author', 'book_cover', 'sku', 'price'
+        fields = ('id', 'name', 'supplier', 'price'
                   , 'old_price', 'discount', 'image', 'description', 'categories')
         
 # class ProductResponseSerializer(serializers.ModelSerializer):
