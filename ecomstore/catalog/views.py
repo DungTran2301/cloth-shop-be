@@ -58,19 +58,19 @@ def addToCart(request):
             product = cart.add_to_cart(request)
             if request.session.test_cookie_worked():
                 request.session.delete_test_cookie()
-            serializers = ProductResponseSerializer(product)
-
-            return Response({'success': True, 'product': serializers.data})
+            res = BaseResponse(True, 200, "success", product) 
+            serializer = GetProductResposeSerializer(res)
+            return Response(serializer.data)
         except Exception as e:
-            return Response({'success': False, 'error': str(e)},  status=status.HTTP_404_NOT_FOUND)
+            res = BaseResponse(False, 400, str(e), None) 
+            serializer = GetProductResposeSerializer(res)
+            return Response(serializer.data)
 
 @api_view(['GET'])
 @csrf_exempt
 def show_product_by_id(request, id):
     product = get_object_or_404(Product, id=id)
     if request.method == 'GET':
-        # serializers = ProductResponseSerializer(product)
-        # return Response(serializers.data)
         res = BaseResponse(True, 200, "success", product) 
         serializer = GetProductResposeSerializer(res)
         return Response(serializer.data)

@@ -9,6 +9,9 @@ from checkout import checkout
 from rest_framework.response import Response
 from .serializers import ProductItemResponseSerializer
 from rest_framework import status
+
+
+from base.models import BaseResponse, GetCartItemResposeSerializer
 # Create your views here.
 @api_view(['GET', 'POST'])
 def show_cart(request):
@@ -27,8 +30,10 @@ def show_cart(request):
   try:
     products = cart.get_cart_items(request)
     cart_subtotal = cart.cart_subtotal(request)
-
-    serializers = ProductItemResponseSerializer(products, many=True)
-    return Response({'total_amount': cart_subtotal, 'items': serializers.data}, status=status.HTTP_201_CREATED)
+    res = BaseResponse(True, 200, "Get cart success", list(products)) 
+    serializer = GetCartItemResposeSerializer(res)
+    return Response(serializer.data)
   except Exception as e:
-    return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    res = BaseResponse(False, 400, str(e), None) 
+    serializer = GetCartItemResposeSerializer(res)
+    return Response(serializer.data)
