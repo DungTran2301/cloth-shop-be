@@ -4,23 +4,37 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect 
 import decimal # not needed yet but we will later
 import random
-CART_ID_SESSION_KEY = 'cart_id'
-# get the current user's cart id, sets new one if blank
-def _cart_id(request):
-  if request.session.get(CART_ID_SESSION_KEY,'') == '':
-    request.session[CART_ID_SESSION_KEY] = _generate_cart_id()
-  return request.session[CART_ID_SESSION_KEY]
+from django.conf import settings
+import jwt
 
-def _generate_cart_id():
-  cart_id = ''
-  characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()'
-  cart_id_length = 50
-  for y in range(cart_id_length):
-    cart_id += characters[random.randint(0, len(characters)-1)]
-  return cart_id
+
+# CART_ID_SESSION_KEY = 'cart_id'
+# # get the current user's cart id, sets new one if blank
+# def _cart_id(request):
+#   if request.session.get(CART_ID_SESSION_KEY,'') == '':
+#     request.session[CART_ID_SESSION_KEY] = _generate_cart_id()
+#   return request.session[CART_ID_SESSION_KEY]
+
+def _user_id(request):
+  auth_header = request.headers.get('Authorization')
+  token = auth_header.split(' ')[1]
+  decoded_token = jwt.decode(
+      token, settings.SECRET_KEY, algorithms=['HS256'])
+  user_id = decoded_token['user_id']
+  return user_id
+
+# def _generate_cart_id():
+#   cart_id = ''
+#   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()'
+#   cart_id_length = 50
+#   for y in range(cart_id_length):
+#     cart_id += characters[random.randint(0, len(characters)-1)]
+#   return cart_id
+
 # return all items from the current user's cart
 def get_cart_items(request):
-  return CartItem.objects.filter(cart_id=_cart_id(request))
+  return CartItem.objects.filter(user_id=_user_id(request))
+
 # add an item to the cart
 def add_to_cart(request):
   postdata = request.data
@@ -39,7 +53,7 @@ def add_to_cart(request):
     ci = CartItem()
     ci.product = p
     ci.quantity = quantity
-    ci.cart_id = _cart_id(request)
+    ci.user_id = _user_id(request)
     ci.save()
   return p
 
@@ -48,7 +62,7 @@ def cart_distinct_item_count(request):
   return get_cart_items(request).count()
 
 def get_single_item(request, item_id):
-  return get_object_or_404(CartItem, id=item_id, cart_id=_cart_id(request))
+  return get_object_or_404(CartItem, id=item_id, user_id=_user_id(request))
 
 def remove_from_cart(request):
   postdata = request.data

@@ -10,7 +10,7 @@ class ProductItemResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         # fields = '__all__'
-        fields = ('id', 'cart_id', 'quantity', 'product')
+        fields = ('id', 'user_id', 'quantity', 'product')
 
 
 # class ProductResponseSerializer(serializers.ModelSerializer):

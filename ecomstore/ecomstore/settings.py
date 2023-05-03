@@ -97,9 +97,9 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         "ENGINE": 'django.db.backends.mysql',
-        "NAME": 'clothshop_ver1',  # Or path to database file...
+        "NAME": 'clothshop',  # Or path to database file...
         "USER": 'root',  # Not used with sqlite3.
-        "PASSWORD": '22091970',  # Not used with sqlite3.
+        "PASSWORD": '2001',  # Not used with sqlite3.
         "HOST": '',  # Set to empty string for localhost....
         "PORT": '',
     }
@@ -183,8 +183,8 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=100),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 
