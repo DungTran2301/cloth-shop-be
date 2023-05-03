@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from .models import Category, Product
 from django.template import RequestContext
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,  permission_classes
 from rest_framework.response import Response
 from .serializers import CategorySerializer, ProductResponseSerializer
 from rest_framework import status

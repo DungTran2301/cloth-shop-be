@@ -1,11 +1,13 @@
 from django.db import models
 from django import forms
-from django.contrib.auth.models import User
+
 from catalog.models import Product
 import decimal
 from django.urls import reverse
+from ecomstore import settings
 
 class BaseOrderInfo(models.Model):
+  
 
   class Meta:
     abstract = True
@@ -34,6 +36,7 @@ class BaseOrderInfo(models.Model):
   billing_zip = models.CharField(max_length=10) 
 
 class Order(BaseOrderInfo):
+  
   # each individual status
   SUBMITTED = 1
   PROCESSED = 2
@@ -49,7 +52,7 @@ class Order(BaseOrderInfo):
   status = models.IntegerField(choices=ORDER_STATUSES, default=SUBMITTED)
   ip_address = models.GenericIPAddressField()
   last_updated = models.DateTimeField(auto_now=True)
-  user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
   transaction_id = models.CharField(max_length=20)
 
   def __unicode__(self):
