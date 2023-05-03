@@ -138,7 +138,7 @@ def product_list(request):
             products = [p for p in products if any(category in p.categories.all() for category in list_category)]
 
         try:
-            listp = products
+            listp = list(products)
             res = BaseResponse(True, 200, "Get product success", listp) 
             serializer = GetProductResposeSerializer(res)
             return Response(serializer.data)#Response(response_data, safe=False)
