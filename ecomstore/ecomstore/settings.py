@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,12 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework_simplejwt.token_blacklist',
     'preview',
     'catalog',
     'utils',
     'cart',
     'django.contrib.sites',
-    'django.contrib.flatpages', 
+    'django.contrib.flatpages',
     'accounts',
     'checkout',
     'comment',
@@ -60,7 +63,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware', 
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+
+
 ]
 
 ROOT_URLCONF = 'ecomstore.urls'
@@ -92,11 +97,11 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         "ENGINE": 'django.db.backends.mysql',
-        "NAME": 'bookstore', # Or path to database file...
-        "USER": 'root', # Not used with sqlite3.
-        "PASSWORD": '2001', # Not used with sqlite3.
-        "HOST": '', # Set to empty string for localhost....
-        "PORT": '', 
+        "NAME": 'clothshop_ver1',  # Or path to database file...
+        "USER": 'root',  # Not used with sqlite3.
+        "PASSWORD": '22091970',  # Not used with sqlite3.
+        "HOST": '',  # Set to empty string for localhost....
+        "PORT": '',
     }
 }
 
@@ -147,20 +152,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_NAME = 'Modern Musician'
 META_KEYWORDS = 'Music, instruments, music accessories, musician supplies'
-META_DESCRIPTION = 'Modern Musician is an online supplier of instruments, sheet music, and other accessories for musicians' 
+META_DESCRIPTION = 'Modern Musician is an online supplier of instruments, sheet music, and other accessories for musicians'
 
 # List of processors used by RequestContext to populate the context.
 # Each one should be a callable that takes the request object as its
 # only parameter and returns a dictionary to add to the context.
 TEMPLATE_CONTEXT_PROCESSORS = (
- 'django.core.context_processors.auth',
- 'django.core.context_processors.debug',
- 'django.core.context_processors.i18n',
- 'django.core.context_processors.media',
- 'ecomstore.utils.context_processors.ecomstore', 
+    'django.core.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'ecomstore.utils.context_processors.ecomstore',
 )
 
-LOGIN_REDIRECT_URL = '/accounts/my_account/'
+# LOGIN_REDIRECT_URL = '/accounts/my_account/'
 
 AUTHNET_POST_URL = 'test.authorize.net'
 AUTHNET_POST_PATH = '/gateway/transact.dll'
@@ -168,3 +173,34 @@ AUTHNET_LOGIN = '8c27nHgM6D'
 AUTHNET_KEY = '4XGpk3c7NWy968cd'
 
 AUTH_PROFILE_MODULE = 'accounts.userprofile'
+AUTH_USER_MODEL = "accounts.User"
+
+REST_FRAMEWORK = {
+    "NON_FIELD_ERRORS_KEY": "errors",
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',)
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'VERIFYING_KEY': SECRET_KEY,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
