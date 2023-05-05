@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-ov(2ruua^ib0ir@x28i=ay)$^ier*+s(9$lnc2$fs@a1w*-59t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.2.2']
 
 
 # Application definition
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'accounts',
     'checkout',
     'comment',
+    'payment',
 ]
 
 SITE_ID = 1
