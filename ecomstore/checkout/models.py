@@ -48,12 +48,9 @@ class Order(BaseOrderInfo):
   (SHIPPED,'Shipped'),
   (CANCELLED,'Cancelled'),)
   # order info
+  user_id = models.CharField(max_length=50)
   date = models.DateTimeField(auto_now_add=True)
   status = models.IntegerField(choices=ORDER_STATUSES, default=SUBMITTED)
-  ip_address = models.GenericIPAddressField()
-  last_updated = models.DateTimeField(auto_now=True)
-  user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
-  transaction_id = models.CharField(max_length=20)
 
   def __unicode__(self):
     return 'Order #' + str(self.id)
@@ -67,6 +64,13 @@ class Order(BaseOrderInfo):
   def get_absolute_url(self):
     print('order_details', self.id)
     return reverse('order_details', args= { self.id }) 
+  @property
+  def appTransId(self):
+    formatted_date = self.date.strftime('%y%m%d')
+    apptransid = f'{formatted_date}_{self.pk}'
+    return apptransid
+  
+  
 class OrderItem(models.Model):
   product = models.ForeignKey(Product, on_delete= models.CASCADE)
   quantity = models.IntegerField(default=1)

@@ -1,42 +1,18 @@
 from django.shortcuts import render
 
-from django.template import RequestContext
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from .forms import CheckoutForm
 from .models import Order, OrderItem
-from accounts import profile
-from . import checkout
 from cart import cart
-
-
-def show_checkout(request, template_name='checkout/checkout.html'):
-    if cart.is_empty(request):
-        cart_url = reverse('show_cart')
-        return HttpResponseRedirect(cart_url)
-    if request.method == 'POST':
-        postdata = request.POST.copy()
-        form = CheckoutForm(postdata)
-        if form.is_valid():
-            response = checkout.process(request)
-            order_number = response.get('order_number', 0)
-            print('order_number: ', order_number)
-            error_message = response.get('message', '')
-            if order_number:
-                request.session['order_number'] = order_number
-                receipt_url = reverse('checkout_receipt')
-                return HttpResponseRedirect(receipt_url)
-        else:
-            error_message = 'Correct the errors below'
-    else:
-        if request.user.is_authenticated:
-            user_profile = profile.retrieve(request)
-            form = CheckoutForm(instance=user_profile)
-        else:
-            form = CheckoutForm()
-    page_title = 'Checkout'
-    return render(request, template_name, locals())
-
+from payment.views import config
+from time import time
+import hmac, hashlib, urllib.parse, urllib.request
+from django.shortcuts import get_object_or_404
+import requests
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 def receipt(request, template_name='checkout/receipt.html'):
     order_number = request.session.get('order_number', '')
@@ -48,3 +24,32 @@ def receipt(request, template_name='checkout/receipt.html'):
         cart_url = reverse('show_cart')
         return HttpResponseRedirect(cart_url)
     return render(request, template_name, locals())
+
+@api_view(['GET'])
+@csrf_exempt
+def checkOrderStatus(request, order_id):
+    hmac_algorithm = hashlib.sha256
+    appid = config["appid"]
+    key1 = config["key1"]
+
+    order  = get_object_or_404(Order, id=order_id)
+    apptransid = order.appTransId
+    print(apptransid)
+    hmac_input = f'{appid}|{apptransid}|{key1}'
+    mac = hmac.new(key1.encode(), hmac_input.encode(), hmac_algorithm).hexdigest()
+
+    data = {
+        'appid': appid,
+        'apptransid': apptransid,
+        'mac': mac
+    }
+
+    print(data)
+    response = requests.post("https://sandbox.zalopay.com.vn/v001/tpe/getstatusbyapptransid", data=data)
+    print(response.json())
+    return Response({
+        'success': True,
+        'code': 200,
+        "message": "Get Order status Successfull",
+        "data": response.json()
+    }, status=status.HTTP_200_OK)

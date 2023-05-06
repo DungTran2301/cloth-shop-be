@@ -4,7 +4,7 @@ class OrderItemInline(admin.StackedInline):
   model = OrderItem
   extra = 0
 class OrderAdmin(admin.ModelAdmin):
-  list_display = ('__unicode__','date','status','transaction_id','user')
+  list_display = ('__unicode__','date','status','user_id')
   list_filter = ('status','date')
   search_fields = ('email','shipping_name','billing_name','id','transaction_id')
   inlines = [OrderItemInline,]
@@ -18,4 +18,5 @@ class OrderAdmin(admin.ModelAdmin):
     'billing_address_2','billing_city','billing_state',
     'billing_zip','billing_country')})
   )
+
 admin.site.register(Order, OrderAdmin)

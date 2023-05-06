@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 import decimal # not needed yet but we will later
 import random
 from django.conf import settings
+from accounts import utils
 import jwt
 
 
@@ -15,13 +16,6 @@ import jwt
 #     request.session[CART_ID_SESSION_KEY] = _generate_cart_id()
 #   return request.session[CART_ID_SESSION_KEY]
 
-def _user_id(request):
-  auth_header = request.headers.get('Authorization')
-  token = auth_header.split(' ')[1]
-  decoded_token = jwt.decode(
-      token, settings.SECRET_KEY, algorithms=['HS256'])
-  user_id = decoded_token['user_id']
-  return user_id
 
 # def _generate_cart_id():
 #   cart_id = ''
@@ -33,7 +27,7 @@ def _user_id(request):
 
 # return all items from the current user's cart
 def get_cart_items(request):
-  return CartItem.objects.filter(user_id=_user_id(request))
+  return CartItem.objects.filter(user_id=utils.user_id(request))
 
 # add an item to the cart
 def add_to_cart(request):
@@ -53,7 +47,7 @@ def add_to_cart(request):
     ci = CartItem()
     ci.product = p
     ci.quantity = quantity
-    ci.user_id = _user_id(request)
+    ci.user_id = utils.user_id(request)
     ci.save()
   return p
 
@@ -62,7 +56,7 @@ def cart_distinct_item_count(request):
   return get_cart_items(request).count()
 
 def get_single_item(request, item_id):
-  return get_object_or_404(CartItem, id=item_id, user_id=_user_id(request))
+  return get_object_or_404(CartItem, id=item_id, user_id=utils.user_id(request))
 
 def remove_from_cart(request):
   postdata = request.data
