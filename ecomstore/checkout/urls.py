@@ -5,6 +5,8 @@ urlpatterns = [
 #  'SSL': settings.ENABLE_SSL }, 'checkout'),
 #  (r'^receipt/$', 'receipt', {'template_name': 'checkout/receipt.html',
 #  'SSL': settings.ENABLE_SSL },'checkout_receipt'), 
-  path("", views.show_checkout, name="checkout"),
-  path("receipt/", views.receipt, name="checkout_receipt")
+  # path("", views.show_checkout, name="checkout"),
+  path("receipt/", views.receipt, name="checkout_receipt"),
+  
+  re_path(r'^order_status/(?P<order_id>\d+)/$', views.checkOrderStatus, name="order_status")
 ]

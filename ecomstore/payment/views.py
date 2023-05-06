@@ -10,6 +10,11 @@ import requests
 import json
 import datetime
 import time
+
+from checkout.serializers import OrderItemSerializer
+
+import checkout.checkout as cu
+from checkout.models import OrderItem
 # Create your views here.
 
 sandboxUrl = "https://sandbox.zalopay.com.vn/v001/tpe/createorder"
@@ -58,13 +63,14 @@ def paymentMethodList(request):
 @csrf_exempt
 def createOrder(request):
     appid = config["appid"]
-    orderid = request.data.get('orderid', '')
     appuser = request.data.get('appuser', '')
     embeddata = request.data.get('embeddata', '')
-    # item = request.data.get('item', [])
-    item = [{'itemid': 'knb', 'itemname': 'kim nguyen bao', 'itemquantity': 1, 'itemprice': 5000}]
     description = request.data.get('description', '')
-    amount = request.data.get('amount', 0)
+    order = cu.create_order(request)
+    orderid = order.pk
+    order_items = OrderItem.objects.filter(order=order)
+    item = [OrderItemSerializer(item).data for item in order_items] 
+    amount = int(order.total)
 
     current_date = datetime.datetime.now()
     formatted_date = current_date.strftime('%y%m%d')
@@ -92,12 +98,42 @@ def createOrder(request):
 
     print(data)
     response = requests.post(sandboxUrl, data=data)
+
+    data_response = {
+        'orderId': orderid,
+        'createOrderResponse': response.json()
+    }
     return Response({
             'success': True,
             'code': 201,
             'message': 'Create payment successful!',
-            'data': response.json()
+            'data': data_response
         }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@csrf_exempt
+def callback(request):
+    result = {}
+    try: 
+        cbdata  = request.data
+        mac = hmac.new(config['key2'].encode(), cbdata.get('data').encode(), hashlib.sha256).hexdigest()
+        if mac != cbdata.get('mac'):
+            # callback không hợp lệ
+            result['returncode'] = -1
+            result['returnmessage'] = 'mac not equal'
+        else:
+            # thanh toán thành công
+            # merchant cập nhật trạng thái cho đơn hàng
+            dataJson = json.loads(cbdata.get('data'))
+            print("update order's status = success where apptransid = " + dataJson['apptransid'])
+
+            result['returncode'] = 1
+            result['returnmessage'] = 'success'
+    except Exception as e:
+        result['returncode'] = 0 # ZaloPay server sẽ callback lại (tối đa 3 lần)
+        result['returnmessage'] = str(e)
+    return Response(result)
 
 @api_view(['GET'])
 @csrf_exempt
