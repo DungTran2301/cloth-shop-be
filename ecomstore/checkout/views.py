@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from accounts import utils
 
 def receipt(request, template_name='checkout/receipt.html'):
     order_number = request.session.get('order_number', '')
@@ -53,3 +54,34 @@ def checkOrderStatus(request, order_id):
         "message": "Get Order status Successfull",
         "data": response.json()
     }, status=status.HTTP_200_OK)
+
+# Create your views here.
+@api_view(['GET'])
+def show_list_order(request):
+    data_response = []
+    orders = Order.objects.filter(id=utils.user_id(request))
+
+    list_response = [
+        {
+            "id": order.pk,
+            "date": order.date,
+            "status": order.status,
+            "order_items": [
+                {
+                    "id": order_item.pk,
+                    "product": order_item.product.name,
+                    "quantity": order_item.quantity,
+                    "price": order_item.price,
+                } for order_item in OrderItem.objects.filter(order=order)
+            ]
+        } for order in orders
+    ]
+    # order_items = OrderItem.objects.filter(order=order)
+
+    return Response({
+            'success': True,
+            'code': 201,
+            'message': 'Get orders successful!',
+            'data': list_response
+        }, status=status.HTTP_201_CREATED)
+
