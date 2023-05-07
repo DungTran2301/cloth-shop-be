@@ -69,6 +69,9 @@ class Order(BaseOrderInfo):
     formatted_date = self.date.strftime('%y%m%d')
     apptransid = f'{formatted_date}_{self.pk}'
     return apptransid
+  @property
+  def orderStatus(self):
+    return self.ORDER_STATUSES[self.status][1]
   
   
 class OrderItem(models.Model):

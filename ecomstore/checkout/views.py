@@ -65,7 +65,7 @@ def show_list_order(request):
         {
             "id": order.pk,
             "date": order.date,
-            "status": order.status,
+            "status": order.orderStatus,
             "order_items": [
                 {
                     "id": order_item.pk,
