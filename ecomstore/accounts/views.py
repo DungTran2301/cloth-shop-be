@@ -1,6 +1,5 @@
 
 from django.contrib.auth import authenticate
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,10 +14,19 @@ from .jwtToken import create_jwt_pair_for_user
 
 from accounts.models import User
 from django.shortcuts import get_object_or_404
-import jwt
 
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
+import jwt
+import firebase_admin
+from firebase_admin import credentials, auth
+from django.conf import settings
+
+from django.contrib.auth.hashers import check_password
+
+
+creds = credentials.Certificate(settings.FIREBASE_CONFIG)
+firebase_app = firebase_admin.initialize_app(creds)
 
 # Create your views here.
 
@@ -44,6 +52,92 @@ def UserRegister(request):
             'success': False,
             'code': 400,
             'message': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def UserRegisterWithGoogleAndGoogle(request):
+    try:
+        auth_header = request.data.get('token')
+        token = auth_header
+        decoded_token = auth.verify_id_token(token)
+        user_id = decoded_token['user_id']
+        try:
+            user = get_object_or_404(User, verifyToken=user_id)
+
+            # đăng nhập
+            if user:
+                user_verify = authenticate(
+                    request,
+                    username=decoded_token['email'],
+                    password=user_id
+                )
+
+                if user_verify:
+                    tokens = create_jwt_pair_for_user(user_verify)
+                    data = {
+                        'success': True,
+                        'code': 200,
+                        "message": "Login Successfull",
+                        "tokens": tokens}
+
+                    return Response(data, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        'success': False,
+                        'code': 400,
+                        'message': 'Username or password is incorrect!',
+                    }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            # đăng ki
+            data = {
+                "name": decoded_token.get("name", ""),
+                "username": decoded_token.get("email", ""),
+                "email": decoded_token.get("email", ""),
+                "password": user_id,
+                "verifyToken": user_id
+            }
+            serializer = SignUpSerializer(data=data)
+            if serializer.is_valid():
+                serializer.validated_data['password'] = make_password(
+                    serializer.validated_data['password'])
+                serializer.save()
+                # đăng nhập sau khi đã đăng kí
+
+                user = get_object_or_404(User, verifyToken=user_id)
+                if user:
+                    user_verify = authenticate(
+                        request,
+                        username=decoded_token['email'],
+                        password=user_id
+                    )
+
+                    if user_verify:
+                        tokens = create_jwt_pair_for_user(user_verify)
+                        data = {
+                            'success': True,
+                            'code': 200,
+                            "message": "Login Successfull",
+                            "tokens": tokens}
+
+                        return Response(data, status=status.HTTP_200_OK)
+                return Response({
+                    'success': False,
+                    'code': 400,
+                    'message': 'Username or password is incorrect!',
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({
+                'success': False,
+                'code': 400,
+                'message': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({
+            'error_message': str(e),
+            'error_code': 400
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -135,6 +229,58 @@ def update_user_profile(request):
             'code': 200,
             "message": "Update Successful"
         }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'error_message': str(e),
+            'error_code': 400
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    try:
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        decoded_token = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=['HS256'])
+        user_id = decoded_token['user_id']
+        # user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
+
+        if not (request.data.get('oldPassword') and request.data.get('newPassword')):
+            return Response({
+                'success': False,
+                'code': 400,
+                'message': "oldPassword field and newPassword field cannot be empty",
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if (request.data.get('oldPassword') == request.data.get('newPassword')):
+            return Response({
+                'success': False,
+                'code': 400,
+                'message': "oldPassword field and newPassword must be different",
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if user.verifyToken:
+            return Response({
+                'success': False,
+                'code': 400,
+                'message': "Unable to change the password of account supply by google and facebook",
+            }, status=status.HTTP_400_BAD_REQUEST)
+        print(user.verifyToken)
+
+        if check_password(request.data.get('oldPassword'), user.password):
+            user.password = make_password(request.data.get('newPassword'))
+            user.save()
+            return Response({
+                'success': True,
+                'code': 200,
+                "message": "Change Password Successful"
+            }, status=status.HTTP_200_OK)
+        return Response({
+            'success': False,
+            'code': 400,
+            "message": "Password is wrong"
+        }, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({
             'error_message': str(e),

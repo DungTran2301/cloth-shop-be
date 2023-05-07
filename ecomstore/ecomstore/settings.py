@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -98,7 +99,7 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': BASE_DIR / 'db.sqlite3',
         "ENGINE": 'django.db.backends.mysql',
-        "NAME": 'clothshop',  # Or path to database file...
+        "NAME": 'clothshop_final',  # Or path to database file...
         "USER": 'root',  # Not used with sqlite3.
         "PASSWORD": '2001',  # Not used with sqlite3.
         "HOST": '',  # Set to empty string for localhost....
@@ -205,3 +206,5 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+FIREBASE_CONFIG = os.path.join(BASE_DIR, 'firebase-config.json')

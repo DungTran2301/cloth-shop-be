@@ -41,8 +41,8 @@ class User(AbstractUser):
     username = models.CharField(max_length=45, unique=True)
     date_of_birth = models.DateField(null=True)
     role = models.CharField(max_length=20, default="USER")
-    telephoneNumber = models.CharField(max_length=20)
-    deliveryAddress = models.CharField(max_length=200)
+    telephoneNumber = models.CharField(max_length=20, default=None, null=True)
+    deliveryAddress = models.CharField(max_length=200, default=None, null=True)
     verifyToken = models.CharField(max_length=200, default=None, null=True)
 
     objects = CustomUserManager()
