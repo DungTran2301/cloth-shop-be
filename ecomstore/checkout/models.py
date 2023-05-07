@@ -48,7 +48,7 @@ class Order(BaseOrderInfo):
   (SHIPPED,'Shipped'),
   (CANCELLED,'Cancelled'),)
   # order info
-  user_id = models.CharField(max_length=50)
+  user_id = models.CharField(max_length=50, default=None, null=True)
   date = models.DateTimeField(auto_now_add=True)
   status = models.IntegerField(choices=ORDER_STATUSES, default=SUBMITTED)
 
