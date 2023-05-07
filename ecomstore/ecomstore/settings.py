@@ -101,7 +101,7 @@ DATABASES = {
         "ENGINE": 'django.db.backends.mysql',
         "NAME": 'clothshop_final',  # Or path to database file...
         "USER": 'root',  # Not used with sqlite3.
-        "PASSWORD": '22091970',  # Not used with sqlite3.
+        "PASSWORD": '2001',  # Not used with sqlite3.
         "HOST": '',  # Set to empty string for localhost....
         "PORT": '',
     }
