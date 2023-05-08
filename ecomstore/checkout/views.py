@@ -59,7 +59,7 @@ def checkOrderStatus(request, order_id):
 @api_view(['GET'])
 def show_list_order(request):
     data_response = []
-    orders = Order.objects.filter(id=utils.user_id(request))
+    orders = Order.objects.filter(user_id=utils.user_id(request))
 
     list_response = [
         {
